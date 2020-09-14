@@ -1,2 +1,3 @@
 ﻿  Window.cpp
-  OxcartConsole.vcxproj -> C:\Code\OxcartConsole\Debug\OxcartConsole.exe
+C:\Development\OxcartConsole\OxcartConsole\source\core\Window.cpp(101,23): warning C4018: '<': signed/unsigned mismatch
+  OxcartConsole.vcxproj -> C:\Development\OxcartConsole\Debug\OxcartConsole.exe

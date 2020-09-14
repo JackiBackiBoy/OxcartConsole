@@ -3,6 +3,8 @@
 
 #include <string>
 #include "Windows.h"
+#include <graphics/Texture2D.h>
+#include <math/Vector2D.h>
 
 class Window
 {
@@ -11,10 +13,12 @@ public:
 	~Window();
 
 	virtual void OnStart() = 0;
-	virtual void OnUpdate() = 0;
-	virtual void OnDraw() = 0;
+	virtual void OnUpdate(const float& aDeltaTime) = 0;
+	virtual void OnDraw(const float& aDeltaTime) = 0;
 
-	int Run();
+	void DrawTexture(Texture2D& aTexture, const Vector2D& aPosition);
+
+	void Run();
 
 private:
 	HANDLE myInputHandle;
