@@ -1,3 +1,4 @@
 ﻿  Window.cpp
-C:\Development\OxcartConsole\OxcartConsole\source\core\Window.cpp(101,23): warning C4018: '<': signed/unsigned mismatch
-  OxcartConsole.vcxproj -> C:\Development\OxcartConsole\Debug\OxcartConsole.exe
+C:\Code\OxcartConsole\OxcartConsole\source\core\Window.cpp(139,23): warning C4018: '<': signed/unsigned mismatch
+C:\Code\OxcartConsole\OxcartConsole\source\core\Window.cpp(148,19): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+  OxcartConsole.vcxproj -> C:\Code\OxcartConsole\Debug\OxcartConsole.exe

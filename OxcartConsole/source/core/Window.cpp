@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <chrono>
+#include <algorithm>
 
 Window::Window(const std::string& aTitle, const int& aScreenWidth, const int& aScreenHeight, const int& aPixelSize)
 	: myTitle(aTitle), myScreenWidth(aScreenWidth), myScreenHeight(aScreenHeight), myPixelSize(aPixelSize)
@@ -30,9 +31,14 @@ void Window::OnStart()
 	tempCFI.dwFontSize.Y = myPixelSize;
 	tempCFI.FontFamily = FF_DONTCARE;
 	tempCFI.FontWeight = FW_NORMAL;
-	wcscpy_s(tempCFI.FaceName, L"Consolas"); // wide-char-string copy
+	wcscpy_s(tempCFI.FaceName, L"Terminal"); // wide-char-string copy
 
-	SetCurrentConsoleFontEx(myOutputHandle, false, &tempCFI);
+	if (SetCurrentConsoleFontEx(myOutputHandle, false, &tempCFI))
+	{
+		int a = 0;
+	}
+
+	DWORD tempErrorCFI = GetLastError();
 
 	// Temporarily set the console window width and height to 1 to allow
 	// the screen buffer size to be set without any issues
@@ -75,7 +81,32 @@ void Window::OnStart()
 		tempCSBI.ColorTable[14] = RGB(255, 255, 0);
 		tempCSBI.ColorTable[15] = RGB(255, 255, 255);
 
+		++tempCSBI.srWindow.Right;
+		++tempCSBI.srWindow.Bottom;
+
 		SetConsoleScreenBufferInfoEx(myOutputHandle, &tempCSBI);
+	}
+
+	// Disable further functionality in the console window like quick-edit, insert-mode, etc.
+	// This allows the console to only act as a raw window where the functionality is instead
+	// guided by the engine and not the console.
+	unsigned long tempConsoleMode;
+
+	if (GetConsoleMode(myInputHandle, &tempConsoleMode))
+	{
+		// Disables all mouse input, quick-edit, control shortcuts, etc.
+		tempConsoleMode = 0x0008 | 0x0010 | 0x0080;
+
+		SetConsoleMode(myInputHandle, tempConsoleMode);
+	}
+
+	// Hide the blinking console cursor
+	CONSOLE_CURSOR_INFO tempCCI;
+
+	if (GetConsoleCursorInfo(myOutputHandle, &tempCCI))
+	{
+		tempCCI.bVisible = false;
+		SetConsoleCursorInfo(myOutputHandle, &tempCCI);
 	}
 
 	DWORD tempError = GetLastError();
@@ -83,13 +114,20 @@ void Window::OnStart()
 
 void Window::OnUpdate(const float& aDeltaTime)
 {
-
+	// Set the title of console to include the title of program and stats about the window
+	std::wstring tempTitle = std::wstring(myTitle.begin(), myTitle.end()) + L" | " +  std::to_wstring(aDeltaTime) + L" ms";
+	SetConsoleTitleW(tempTitle.c_str());
 }
 
 void Window::OnDraw(const float& aDeltaTime)
 {
 	SMALL_RECT tempWindowRectangle = { 0, 0, (short)myScreenWidth - 1, (short)myScreenHeight - 1 };
 	WriteConsoleOutputW(myOutputHandle, myScreenBuffer, { (short)myScreenWidth, (short)myScreenHeight }, { 0, 0 }, &tempWindowRectangle);
+
+	CHAR_INFO tempCharInfo;
+	tempCharInfo.Attributes = 0;
+	tempCharInfo.Char.UnicodeChar = 0x0020;
+	std::fill(myScreenBuffer, myScreenBuffer + myScreenWidth * myScreenHeight, tempCharInfo);
 }
 
 void Window::DrawTexture(Texture2D& aTexture, const Vector2D& aPosition)
@@ -103,8 +141,15 @@ void Window::DrawTexture(Texture2D& aTexture, const Vector2D& aPosition)
 		// 0x00FF (essentially the 17th color) indicates that the color should be transparent, thus not needed to be drawn to the buffer
 		if (tempPixelData[i] != 0x00FF)
 		{
-			myScreenBuffer[(i / tempTextureWidth) * myScreenWidth + (i - ((i / tempTextureWidth) * tempTextureWidth))].Attributes = tempPixelData[i];
-			myScreenBuffer[(i / tempTextureWidth) * myScreenWidth + (i - ((i / tempTextureWidth) * tempTextureWidth))].Char.UnicodeChar = 0x0020;
+			// Check that the pixel to be drawn isn't outside the screen
+			if (aPosition.x + i % tempTextureWidth >= 0 && aPosition.x + i % tempTextureWidth < myScreenWidth &&
+				aPosition.y + (i / tempTextureWidth) >= 0 && aPosition.y + (i / tempTextureWidth) < myScreenHeight)
+			{
+				int tempIndex = myScreenWidth * (i / tempTextureWidth + aPosition.y) + aPosition.x + i % tempTextureWidth;
+
+				myScreenBuffer[tempIndex].Attributes = tempPixelData[i];
+				myScreenBuffer[tempIndex].Char.UnicodeChar = 0x0020;
+			}
 		}
 	}
 }

@@ -146,6 +146,8 @@
     <ClCompile Include="source\core\Window.cpp" />
     <ClCompile Include="source\graphics\Color.cpp" />
     <ClCompile Include="source\graphics\Texture2D.cpp" />
+    <ClCompile Include="source\graphics\Tilemap.cpp" />
+    <ClCompile Include="source\input\Keyboard.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\math\Vector2D.cpp" />
     <ClCompile Include="source\Sandbox.cpp" />
@@ -155,6 +157,9 @@
     <ClInclude Include="source\core\Window.h" />
     <ClInclude Include="source\graphics\Color.h" />
     <ClInclude Include="source\graphics\Texture2D.h" />
+    <ClInclude Include="source\graphics\Tilemap.h" />
+    <ClInclude Include="source\input\Keyboard.h" />
+    <ClInclude Include="source\input\KeyCode.h" />
     <ClInclude Include="source\math\Vector2D.h" />
     <ClInclude Include="source\thirdparty\stb_image\stb_image.h" />
   </ItemGroup>
